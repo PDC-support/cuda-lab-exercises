@@ -1,0 +1,188 @@
+
+module CUDAKernels
+contains
+    !
+    ! Converts a given 24bpp image into 8bpp grayscale using the GPU.
+    !
+    !attributes(global) subroutine gpu_grayscale(width, height, image, image_out)
+    !    implicit none
+         !////////////////
+         !// TO-DO #4.2 /////////////////////////////////////////////
+         !// Implement the GPU version of the grayscale conversion //
+         !///////////////////////////////////////////////////////////
+    !end subroutine gpu_grayscale
+    
+    !
+    ! Applies a 3x3 convolution matrix to a pixel using the CPU.
+    !
+    attributes(host) subroutine cpu_applyFilter(image, offset_t, stride, matrix, filter_dim, pixel_out)
+        implicit none
+        real, intent(in)  :: image(:)
+        integer, value    :: offset_t
+        integer, value    :: stride
+        real, intent(in)  :: matrix(:)
+        integer, value    :: filter_dim
+        real, intent(out) :: pixel_out
+        integer           :: h
+        integer           :: w
+        integer           :: offset
+        integer           :: offset_kernel
+        
+        pixel_out = 0.0
+        
+        do h=1,filter_dim
+            offset        = offset_t + (h - 1) * stride
+            offset_kernel = (h - 1) * filter_dim
+            
+            do w=1,filter_dim
+                pixel_out = pixel_out + image(offset + w) * matrix(offset_kernel + w)
+            end do
+        end do
+    end subroutine cpu_applyFilter
+    
+    !
+    ! Applies a 3x3 convolution matrix to a pixel using the GPU.
+    !
+    attributes(device) subroutine gpu_applyFilter(image, offset_t, stride, matrix, filter_dim, pixel_out)
+        implicit none
+        real, intent(in)  :: image(:)
+        integer, value    :: offset_t
+        integer, value    :: stride
+        real, intent(in)  :: matrix(:)
+        integer, value    :: filter_dim
+        real, intent(out) :: pixel_out
+        !////////////////
+        !// TO-DO #5.2 ////////////////////////////////////////////////
+        !// Implement the GPU version of cpu_applyFilter()           //
+        !//                                                          //
+        !// Does it make sense to have a separate gpu_applyFilter()? //
+        !//////////////////////////////////////////////////////////////
+    end subroutine gpu_applyFilter
+
+    !
+    ! Applies a Gaussian 3x3 filter to a given image using the GPU.
+    !
+    attributes(global) subroutine gpu_gaussian(width, height, image, image_out)
+        implicit none
+        integer, value     :: width
+        integer, value     :: height
+        real, intent(in)   :: image(:)
+        real, intent(out)  :: image_out(:)
+        real, dimension(9) :: gaussian
+        integer            :: index_x
+        integer            :: index_y
+        integer            :: offset_t
+        integer            :: offset
+        
+        gaussian = (/ (1.0 / 16.0), (2.0 / 16.0), (1.0 / 16.0), &
+                      (2.0 / 16.0), (4.0 / 16.0), (2.0 / 16.0), &
+                      (1.0 / 16.0), (2.0 / 16.0), (1.0 / 16.0) /)
+        
+        index_x = (blockIdx%x - 1) * blockDim%x + threadIdx%x
+        index_y = (blockIdx%y - 1) * blockDim%y + threadIdx%y
+        
+        if (index_x <= (width - 2) .AND. index_y <= (height - 2)) then
+            offset_t = (index_y - 1) * width + index_x
+            offset   = index_y * width + index_x + 2
+            
+            call gpu_applyFilter(image, offset_t, width, gaussian, 3, image_out(offset))
+        end if
+    end subroutine gpu_gaussian
+
+    !
+    ! Calculates the gradient of an image using a Sobel filter on the GPU.
+    !
+    !attributes(global) subroutine gpu_sobel(width, height, image, image_out)
+    !    implicit none
+         !////////////////
+         !// TO-DO #6.1 /////////////////////////////////////
+         !// Implement the GPU version of the Sobel filter //
+         !///////////////////////////////////////////////////
+    !end subroutine gpu_sobel
+end module CUDAKernels
+
+program lab02_ex3_6
+!    use HelperSubroutines
+    use CUDAKernels
+    use cudafor
+    implicit none
+    integer, parameter        :: BLOCK_SIZE   = 16
+    integer, parameter        :: IMAGE_WIDTH  = 3840 ! Fixed image width
+    integer, parameter        :: IMAGE_HEIGHT = 2160 ! Fixed image height
+    integer, parameter        :: NUM_BLOCKS_X = ((IMAGE_WIDTH  + (BLOCK_SIZE - 1)) / BLOCK_SIZE)
+    integer, parameter        :: NUM_BLOCKS_Y = ((IMAGE_HEIGHT  + (BLOCK_SIZE - 1)) / BLOCK_SIZE)
+    real, allocatable         :: bitmap(:)
+    real, allocatable, device :: d_bitmap(:)
+    real, allocatable         :: image_out_1(:)
+    real, allocatable         :: image_out_2(:)
+    real, allocatable, device :: d_image_out_1(:)
+    real, allocatable, device :: d_image_out_2(:)
+    integer                   :: image_size
+    integer                   :: elapsed_cpu
+    integer                   :: elapsed_gpu
+    integer                   :: hr
+    type(dim3) :: grid
+    type(dim3) :: block
+    
+    ! Read the input image and update the grid dimension
+    allocate(bitmap(IMAGE_WIDTH * IMAGE_HEIGHT * 3));
+    call c_readbmp(bitmap)
+    
+    image_size = IMAGE_WIDTH * IMAGE_HEIGHT;
+    grid       = dim3(NUM_BLOCKS_X, NUM_BLOCKS_Y, 1)
+    block      = dim3(BLOCK_SIZE, BLOCK_SIZE, 1)
+    
+    ! Allocate the intermediate image buffers for each step
+    allocate(image_out_1(image_size))
+    allocate(image_out_2(image_size))
+    hr = cudaMalloc(d_image_out_1, image_size);
+    hr = cudaMalloc(d_image_out_2, image_size);
+    
+    hr = cudaMalloc(d_bitmap, image_size * 3);
+    hr = cudaMemcpy(d_bitmap, bitmap, image_size * 3)
+    
+    ! Step 1: Convert to grayscale
+    !{
+        call c_step1_begin(bitmap, image_out_1)
+        
+        ! call gpu_grayscale<<<grid, block>>>(IMAGE_WIDTH, IMAGE_HEIGHT, d_bitmap, d_image_out_1)
+        
+        ! hr = cudaMemcpy(image_out_1, d_image_out_1, image_size)
+        
+        call c_step1_end(image_out_1)
+    !}
+    
+    ! Step 2: Apply a 3x3 Gaussian filter
+    !{
+        call c_step2_begin(image_out_1, image_out_2)
+        
+        ! call gpu_gaussian<<<grid, block>>>(IMAGE_WIDTH, IMAGE_HEIGHT, d_image_out_1, d_image_out_2)
+        
+        ! hr = cudaMemcpy(image_out_2, d_image_out_2, image_size)
+        
+        call c_step2_end(image_out_2)
+    !}
+    
+    ! Step 3: Apply a Sobel filter
+    !{
+        call c_step3_begin(image_out_2, image_out_1)
+        
+        ! call gpu_sobel<<<grid, block>>>(IMAGE_WIDTH, IMAGE_HEIGHT, d_image_out_2, d_image_out_1)
+        
+        ! hr = cudaMemcpy(image_out_1, d_image_out_1, image_size)
+        
+        call c_step3_end(image_out_1)
+    !}
+    
+    ! Release the allocated memory
+    deallocate(image_out_1)
+    deallocate(image_out_2)
+    hr = cudaFree(d_image_out_1)
+    hr = cudaFree(d_image_out_2)
+    
+    deallocate(bitmap)
+    hr = cudaFree(d_bitmap)
+    
+    call c_freebmp()
+end program lab02_ex3_6
+

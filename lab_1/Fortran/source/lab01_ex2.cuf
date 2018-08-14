@@ -1,0 +1,125 @@
+
+module HelperSubroutines
+contains
+    !
+    ! Helper method to generate a very naive "hash".
+    !
+    subroutine generate_hash(n, y, hash)
+        implicit none
+        integer, intent(in) :: n
+        real, intent(in)    :: y(:)
+        real, intent(out)   :: hash
+        integer             :: i
+        
+        hash = sum(y)
+    end subroutine generate_hash
+    
+    !
+    ! SAXPY reference implementation using the CPU.
+    !
+    subroutine cpu_saxpy(n, a, x, y)
+        implicit none
+        integer, intent(in) :: n
+        real, intent(in)    :: a
+        real, intent(in)    :: x(:)
+        real, intent(inout) :: y(:)
+        integer             :: i
+        
+        y = a * x + y
+    end subroutine cpu_saxpy
+end module HelperSubroutines
+
+module CUDAKernels
+contains
+!////////////////
+!// TO-DO #2.6 /////////////////////////////////////////////////////////////
+!// Declare the kernel gpu_saxpy() with the same interface as cpu_saxpy() //
+!///////////////////////////////////////////////////////////////////////////
+end module CUDAKernels
+
+program lab01_ex2
+    use HelperSubroutines
+    use CUDAKernels
+    use cudafor
+    implicit none
+    integer, parameter        :: BLOCK_SIZE = 256
+    integer, parameter        :: ARRAY_SIZE = 16777216
+    integer                   :: argc
+    character(len=21)         :: argv
+    real                      :: a
+    real, allocatable         :: x(:)
+    real, allocatable         :: y(:)
+    real                      :: error
+    real                      :: error_gpu
+    integer                   :: hr
+    
+    !////////////////
+    !// TO-DO #2.2 ///////////////////////////////
+    !// Introduce the grid and block definition //
+    !/////////////////////////////////////////////
+    
+    !//////////////////
+    !// TO-DO #2.3.1 /////////////////////////////
+    !// Declare the device pointers d_x and d_y //
+    !/////////////////////////////////////////////
+    
+    ! Make sure the constant is provided
+    argc = command_argument_count()
+    if(argc /= 1) then
+        write (*,*) 'Error: The constant is missing!'
+        call exit(-1)
+    end if
+    
+    ! Retrieve the constant and allocate the arrays on the CPU
+    call get_command_argument(1, argv)
+    READ (argv,*) a
+    allocate(x(ARRAY_SIZE))
+    allocate(y(ARRAY_SIZE))
+    
+    ! Initialize them with fixed values
+    x = 0.1
+    y = 0.2
+    
+    !//////////////////
+    !// TO-DO #2.3.2 ////////////////////////////////////////////////////////
+    !// Allocate d_x and d_y on the GPU, and copy the content from the CPU //
+    !////////////////////////////////////////////////////////////////////////
+    
+    ! Call the CPU code
+    call cpu_saxpy(ARRAY_SIZE, a, x, y)
+    
+    ! Calculate the "hash" of the result from the CPU
+    call generate_hash(ARRAY_SIZE, y, error);
+    
+    !////////////////
+    !// TO-DO #2.4 ////////////////////////////////////////
+    !// Call the GPU kernel gpu_saxpy() with d_x and d_y //
+    !//////////////////////////////////////////////////////
+    
+    !//////////////////
+    !// TO-DO #2.5.1 ////////////////////////////////////////////////////
+    !// Copy the content of d_y from the GPU to the array y on the CPU //
+    !////////////////////////////////////////////////////////////////////
+    
+    ! Calculate the "hash" of the result from the GPU
+    call generate_hash(ARRAY_SIZE, y, error_gpu);
+    
+    error = abs(error - error_gpu)
+    
+    ! Confirm that the execution has finished
+    write (*,*) 'Execution finished (error=', error, ').'
+    
+    if (error > 0.0001) then
+        write (*,*) 'Error: The solution is incorrect!'
+    end if
+    
+    ! Release all the allocations
+    deallocate(x)
+    deallocate(y)
+    
+    !//////////////////
+    !// TO-DO #2.5.2 /////////
+    !// Release d_x and d_y //
+    !/////////////////////////
+end program lab01_ex2
+
