@@ -5,8 +5,8 @@ _Introduction to High-Performance Computing_
 ## Introduction
 
 In this first laboratory about GPU programming in CUDA, we are going to
-introduce you to the very basics concepts you need to start programming your
-own GPU-accelerated applications. The laboratory is divided in two different
+introduce you to the very basic concepts you need to start programming your
+own GPU-accelerated applications. The laboratory is divided into two different
 blocks and exercises, for your own convenience:
 
 + **Block A (Friday / 17<sup>th</sup> of August)**: The first block aims to provide you with
@@ -30,7 +30,7 @@ For all the exercises, we are going to use Tegner.
 > to use Tegner during the sessions of today and Monday.
 
 Tegner is a cluster at KTH
-Royal Institute of Technology with 65 heterogeneous nodes. Every node has a one
+Royal Institute of Technology with 65 heterogeneous nodes. Every node has one
 or two GPUs, based on the NVIDIA Quadro K420 or the NVIDIA Tesla K80. For the
 purposes of this laboratory, we will use the "Thin Nodes" of Tegner.
 These nodes contain 2&times;12-core Intel E5-2690v3 CPUs at 2.60GHz, 512GB DRAM and
@@ -83,6 +83,7 @@ Once you are connected, clone the cuda exercise repository in your Klemming fold
 
 ```
 cd /cfs/klemming/nobackup/your_initial/your_username
+module load git
 git clone https://github.com/PDC-support/cuda-lab-exercises.git
 cd cuda-lab-exercises/lab_1/C
 ```
@@ -99,10 +100,9 @@ exercises, you can look inside the given solutions folder. For your own
 interest, avoid to check the solutions first and ask us any of the doubts you
 may have. Solution exists on the solution branch on Github.
 
-[https://github.com/PDC-support/cuda-lab-exercises/tree/solutions]
-(https://github.com/PDC-support/cuda-lab-exercises/tree/solutions)
+https://github.com/PDC-support/cuda-lab-exercises/tree/solutions
 
-**Let us now compile and run the fib01\_ex1.cu file.** This file
+**Let us now compile and run the lab01\_ex1.cu file.** This file
 contains a very simple (yet very important) "Hello World!" CUDA program. We
 will ask you to solve some issues with this exercise later below.
 
@@ -123,7 +123,7 @@ thread identifier. The CUDA kernel is launched with 1 block of 32 threads, so
 we simply have to use the predefined ``threadIdx`` constant on the X direction. In
 other words, we are declaring the grid dimension as ``grid(1)`` and the block
 dimension as ``block(32)``. Given the fact that the base type for each variable is
-dim3, this means that we are implicitly creating a grid of blocks in the (X, Y,
+``dim3``, this means that we are implicitly creating a grid of blocks in the (X, Y,
 Z) direction with a value 1 for Y and Z by default. The declaration of the
 example is equivalent to the following:
 
@@ -145,17 +145,17 @@ will also load all the necessary CUDA dependencies:
 module load cuda/7.0
 ```
 
-To compile CUDA programs, we will use the nvcc command. This is a proprietary
+To compile CUDA programs, we will use the ``nvcc`` command. This is a proprietary
 NVIDIA compiler for CUDA that separates the host code (CPU code) from the GPU
 code. The compiler will invoke GCC or ICC for the host code, as necessary. For
 you, the only consideration is to use this compiler when you declare CUDA code
-in your files, as follow:
+in your files, as follows:
 
 ```
 nvcc -arch=sm_30 lab01_ex1.cu -o lab01_ex1.out
 ```
 
-The previous command asks nvcc to compile ``lab01_ex1.cu`` and to generate a binary
+The previous command asks ``nvcc`` to compile ``lab01_ex1.cu`` and to generate a binary
 executable named ``lab01_ex1.out``. The example also requests support for the
 feature version of CUDA architecture 3.0 (i.e., ``sm_30``). This is required to
 distinguish old generations of graphic cards with new releases, that contain
@@ -272,7 +272,7 @@ will use this function as reference for the GPU version later in the exercise.
 We will use the file ``lab01_ex2.cu`` for solving the exercise. The source code
 contains a ``main()`` function that allocates two arrays, x and y, and initializes
 each element of the array with 0.1 and 0.2, respectively. It is expected that
-the user provides the value of the constant "_a_" as input for the
+the user provides the value of the constant "a" as input for the
 program. The size of each array is predefined with the constant ``ARRAY_SIZE``.
 Right now, the program only calls ``cpu_saxpy()`` to compute the SAXPY result using
 the CPU, but later you will introduce a call to the GPU version as well.
@@ -339,15 +339,18 @@ suggest you to request enough threads for the GPU to cover all the elements of
 each array at once. Do not worry if you request more threads than elements in
 the array, but try to fit the value.
 
-+ Hint #1: Use the constant ``ARRAY_SIZE`` to determine how many blocks of threads in the X direction you will need.
-+ Hint #2: Use the constant ``BLOCK_SIZE`` to define the number of threads in the X direction, per block.
-+ Hint #3: For correctness, consider that the ``ARRAY_SIZE`` might not be multiple of the ``BLOCK_SIZE``
++ Hint #1: Use the constant ``ARRAY_SIZE`` to determine how many blocks of
+  threads in the X direction you will need.
++ Hint #2: Use the constant ``BLOCK_SIZE`` to define the number of threads in
+  the X direction, per block.
++ Hint #3: For correctness, consider that the ``ARRAY_SIZE`` might not be
+  multiple of the ``BLOCK_SIZE``.
 
 ---
 
 After the grid and block dimensions are defined, the next step would be to
 declare the device pointers that contain the elements of x and y, but on the
-GPU side. The constant "_a_" can be passed by value to the CUDA kernel,
+GPU side. The constant "a" can be passed by value to the CUDA kernel,
 so no changes are required in this regard. We recommend you to always use the
 prefix ``d_`` for the device-related pointers, as a good naming
 convention. For instance, in this case, we should use ``d_x`` and ``d_y`` for the
@@ -355,7 +358,8 @@ device pointers that contain the elements of their equivalent x and y arrays in
 the CPU:
 
 ```
-float *d_x = NULL; float *d_y = NULL;
+float *d_x = NULL;
+float *d_y = NULL;
 ```
 
 Declaring only the ``d_x`` and ``d_y`` pointers will not seem to provide that much
@@ -365,7 +369,7 @@ and y are already allocated on the host side, we should account for the fact
 that the memory visible to the CPU is not visible to the GPU. 
 
 > The Unified Memory Model of CUDA is an exception. This model manages the data
-> transfers from the host to the GPU, and back, in an automatic manner. In this
+> transfer from the host to the GPU, and back, in an automatic manner. In this
 > laboratory session, we use the classical model, where the memory management is
 > up to the programmer. This also has benefits for performance.
 
@@ -404,7 +408,7 @@ necessary changes to launch the SAXPY kernel. Assume that the name of the
 kernel is ``gpu_saxpy()`` and that the input parameters follow the interface of
 the CPU version, but using ``d_x`` and ``d_y`` instead.
 
-+ Hint #1: The triple-bracket <<<>>> notation is always required when calling a CUDA kernel.
++ Hint #1: The triple-bracket ``<<<>>>`` notation is always required when calling a CUDA kernel.
 + Hint #2: Constants can be passed by value to a CUDA kernel, without any additional changes.
 
 ---
@@ -441,7 +445,7 @@ of the code that you added (i.e., setting up the kernel) is always going to be
 very similar from application to application.
 
 To make it simpler for you, let us split the implementation of the kernel in
-two **TO-DO **steps. The first one is to declare the SAXPY kernel. We will
+two **TO-DO** steps. The first one is to declare the SAXPY kernel. We will
 call it ``gpu_saxpy()``.
 
 ---
@@ -453,7 +457,7 @@ Find the "TO-DO #2.6" section inside ``lab01_ex2.cu`` and declare an empty
 + Hint #1: Do not forget that CUDA kernels require a special keyword to
   differentiate from CPU functions.
 + Hint #2: The primitive types of CUDA are equivalent to the primitive types of
-  plain C on the CPU (e.g., float).
+  plain C on the CPU (e.g., ``float``).
 
 ---
 
@@ -466,7 +470,7 @@ the following:
    work.
 2. You have to define a way to index the data being processed by the current
    thread in the kernel. Remember, you are splitting up the data into a grid of
-   block of threads.
+   blocks of threads.
 3. You have to guarantee that no thread accesses out-of-bounds data. If you
    defined more threads than elements per array (you might!), make sure all the
    accesses are correct.
@@ -475,9 +479,9 @@ With these few key-points in mind, here it comes the hardest part of the
 exercise: implementing the CUDA version of SAXPY. Starting from the CPU
 version, we ask you to calculate the index of the thread and to operate on the
 data following the same SAXPY model as before. The output must be stored on
-``d_y``. You can use threadIdx to understand the ID of the thread inside the block,
-blockIdx to understand the ID of the block that the thread belongs to, and
-blockDim to obtain the number of threads per block. Remember, we are operating
+``d_y``. You can use ``threadIdx`` to understand the ID of the thread inside the block,
+``blockIdx`` to understand the ID of the block that the thread belongs to, and
+``blockDim`` to obtain the number of threads per block. Remember, we are operating
 __on the X direction only__.
 
 ---
@@ -497,14 +501,14 @@ check, based on the input parameter "n".
 
 At this point, you have now completed most of the complexity of this exercise.
 The last part is to evaluate if your code really works as expected. For that,
-we ask you to compile it with nvcc and solve any issues that the compiler
+we ask you to compile it with ``nvcc`` and solve any issues that the compiler
 might report, if any.
 
 > Do not forget the ``-arch=sm_30`` architecture flag when compiling.
 
-Thereafter, request a compute node on Tegner with salloc
-and run your code with srun. Keep in mind that you also need to provide the
-value of the constant "_a_" to the executable (e.g., 2.0 is fine):
+Thereafter, request a compute node on Tegner with ``salloc``
+and run your code with ``srun``. Keep in mind that you also need to provide the
+value of the constant "a" to the executable (e.g., 2.0 is fine):
 
 ```
 srun -n 1 ./lab01_ex2.out 2.0
@@ -519,7 +523,7 @@ Execution finished (error=0.000000).
 If you managed to define the kernel and get exactly this output, well done!
 This is a great achievement, congratulations! If you get something different,
 such as an error message reporting that the solution is incorrect, quickly
-review all the "TO-DO" steps of the exercise from the beginning to make sure
+review all the "**TO-DO**" steps of the exercise from the beginning to make sure
 that you did not miss anything. Feel free to ask us if you are lost, we are
 here to help.
 
@@ -547,8 +551,8 @@ the problem size is not big enough to compensate the previous fact.
 You can use ``gettimeofday()`` to obtain the current timestamp in microseconds (see
 [https://goo.gl/xMv177](https://goo.gl/xMv177)). The source code already
 contains the definition of a ``get_elapsed()`` function that calculates the elapsed
-time between two given tval values, and converts the returned value to
-milliseconds. The definition of tval is on the beginning of the file. In
+time between two given ``tval`` values, and converts the returned value to
+milliseconds. The definition of ``tval`` is on the beginning of the file. In
 addition, you can use ``printf()`` to output the measured time on each version.
 
 For the GPU case, you need to measure the time **independently** by dividing the
@@ -567,9 +571,9 @@ execution time of the CPU and GPU implementations of SAXPY. For the GPU
 version, make sure that you consider the execution of the kernel, alongside any
 data transfers performed.
 
-Hint #1: Keep in mind that the kernel execution is asynchronous. Hence, you
-have to guarantee that the kernel has already run on the GPU, before measuring
-the transfer of the result back to the host.
++ Hint #1: Keep in mind that the kernel execution is asynchronous. Hence, you
+  have to guarantee that the kernel has already run on the GPU, before
+  measuring the transfer of the result back to the host.
 
 ---
 
@@ -603,7 +607,7 @@ In this exercise, we ask you to evaluate the performance of your SAXPY
 implementation by varying the block size from 1, 2, 4, 8, ..., up to 512 (i.e.,
 using multiples of 2). We also request you to avoid the ``BLOCK_SIZE`` constant and
 define a mechanism that allows you to vary this parameter without re-compiling
-the program. Use the code that already exists for the constant "_a_" of
+the program. Use the code that already exists for the constant "a" of
 SAXPY, as reference.
 
 > The only difference is that you are expecting an integer value instead. See
