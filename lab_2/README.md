@@ -2,7 +2,7 @@
 
 _Introduction to High-Performance Computing_
 
-<img src="html/cover.png" alt="BGR" width="800px" align="middle"/>
+<img src="html/cover.jpeg" alt="BGR" width="800px"/>
 
 ## Introduction
 
@@ -83,7 +83,7 @@ and more. After the header, a subsequent string of interleaved color values
 follow (e.g., in BGR). Here is a simplified example of how a 3x3 image looks
 like inside the file:
 
-<img src="html/bgr.png" alt="BGR" width="800px" align="middle"/>
+<img src="html/bgr.png" alt="BGR" width="800px"/>
 
 Each BGR, from Blue / Green / Red, represents an 8-bit pixel value in the image
 that encodes the intensity of each channel. The values span from 0 to 255 in
@@ -128,7 +128,7 @@ display -resize 1280x720 images/lab02.bmp
 If everything worked as expected, you must see a new window after a few seconds
 (be patient):
 
-<img src="html/fig1.png" alt="Figure 1" width="800px" align="middle"/>
+<img src="html/fig1.jpeg" alt="Figure 1" width="800px"/>
 
 **You are now ready to begin with the exercises!** If you did not get a new window,
 please, ask any of the laboratory assistants for help.
@@ -158,7 +158,7 @@ maintains the same absolute luminance. In practice terms, what we are going to
 do is to take each BGR value of the Bitmap file and apply the following
 conversion using the weighted sum of the three values:
 
-<img src="html/yuv.png" alt="YUV" width="800px" align="middle"/>
+<img src="html/yuv.png" alt="YUV" width="800px"/>
 
 ---
 **TO-DO [4.1]**
@@ -220,7 +220,7 @@ display -resize 1280x720 images/lab02_result_1.bmp
 
 You must get a new window that displays the converted image in black & white, such as this:
 
-<img src="html/fig2.png" alt="Figure 2" width="800px" align="middle"/>
+<img src="html/fig2.jpeg" alt="Figure 2" width="800px"/>
 
 ### Exercise 5 - Applying a Convolution Filter
 
@@ -249,7 +249,7 @@ values:
 need source
 -->
 
-<img src="html/conv.png" alt="Convolution" width="800px" align="middle"/>
+<img src="html/conv.png" alt="Convolution" width="800px"/>
 
 The * operator represents the convolution, not a matrix multiplication.
 Here, what you have to consider is to map each pixel as the center of the 3&times;3
@@ -311,7 +311,7 @@ The new window will display a cropped area of the original black & white image
 (left), and a cropped area of the new blurred image (right). The differences
 are very subtle, but you should be able to notice some differences:
 
-<img src="html/fig3.png" alt="Figure 3" width="800px" align="middle"/>
+<img src="html/fig3.jpeg" alt="Figure 3" width="800px"/>
 
 If you did not manage to get any differences, please, make sure that you have
 correctly enabled the new version of the ``xxx_applyFilter()`` inside the
@@ -336,12 +336,12 @@ derivative approximations, the computations are as follow:
 need source
 -->
 
-<img src="html/matrix.png" alt="Convolution Matrices" width="800px" align="middle"/>
+<img src="html/matrix.png" alt="Convolution Matrices" width="800px"/>
 
 The resultant gradient magnitude of the pixel is obtained by calculating the
 square root of these:
 
-<img src="html/gradient.png" alt="Gradient" width="800px" align="middle"/>
+<img src="html/gradient.png" alt="Gradient" width="800px"/>
 
 For the last exercise, we want you to implement the GPU version of ``cpu_sobel()``,
 which is already declared in ``lab02_ex3_6.cu`` under the name ``gpu_sobel()``. The
@@ -377,7 +377,7 @@ A new window will open that displays the original image (left), the black &
 white image (center), and finally the result of applying the Gaussian and Sobel
 filters (right):
 
-<img src="html/fig4.png" alt="Figure 4" width="800px" align="middle"/>
+<img src="html/fig4.jpeg" alt="Figure 4" width="800px"/>
 
 You can also observe how the result image looks like in larger resolution. Use
 the display command in combination with the resize flag:
@@ -391,7 +391,7 @@ visualize a full resolution of the image. This might take some time to load,
 but it might be worth it to consider all the small details. Whether you resize
 the image or not, you should observe something like the following:
 
-<img src="html/fig5.png" alt="Figure 5" width="800px" align="middle"/>
+<img src="html/fig5.jpeg" alt="Figure 5" width="800px"/>
 
 **If you reached this point, you can consider yourself a CUDA master!** We hope
 that you enjoyed the laboratory session.
@@ -474,7 +474,7 @@ is not exactly what you expected it to be. You should see by now something like
 this, in the case of the Gaussian filter and the side-by-side comparison with
 the original image:
 
-<img src="html/fig6.png" alt="Figure 6" width="800px" align="middle"/>
+<img src="html/fig6.jpeg" alt="Figure 6" width="800px"/>
 
 The reason is that the exercise is a little bit more complex than initially one
 might expect. With the change that you just introduced, we are not considering
