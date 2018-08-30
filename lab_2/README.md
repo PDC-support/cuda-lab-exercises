@@ -367,10 +367,10 @@ kernel inside ``main()``, execute the application with srun, and open the result
 with the following two commands:
 
 ```
-   montage -border 0 -geometry 640x360 -tile 3x1      \
-           images/lab02.bmp images/lab02_result_1.bmp \
-           images/lab02_result_3.bmp images/lab02_result_3_comp.jpg
-   display images/lab02_result_3_comp.jpg
+montage -border 0 -geometry 640x360 -tile 3x1      \
+        images/lab02.bmp images/lab02_result_1.bmp \
+        images/lab02_result_3.bmp images/lab02_result_3_comp.jpg
+display images/lab02_result_3_comp.jpg
 ```
 
 A new window will open that displays the original image (left), the black &
