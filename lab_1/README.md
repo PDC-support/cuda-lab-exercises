@@ -9,11 +9,11 @@ introduce you to the very basic concepts you need to start programming your
 own GPU-accelerated applications. The laboratory is divided into two different
 blocks and exercises, for your own convenience:
 
-+ **Block A (Friday / 17<sup>th</sup> of August)**: The first block aims to provide you with
++ **Block A (Friday / 23<sup>th</sup> of August)**: The first block aims to provide you with
   a first notion on how to use CUDA. This includes how to compile a CUDA
   program, how to launch a CUDA kernel, how to index 1D arrays, and more.
 
-+ **Block B (Monday / 20<sup>th</sup> of August)**: The second block presents a use-case
++ **Block B (Monday / 26<sup>th</sup> of August)**: The second block presents a use-case
   for using GPUs with images. The goal is to make you understand how to index
   2D matrices, while doing something practical.
 
