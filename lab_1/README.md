@@ -95,13 +95,6 @@ CUDA programs have the extension "cu". This is a mere naming
 convention to identify your different GPU-based source code files. It is also a
 good way for other programmers to understand that the file contains CUDA code.
 
-In case you would like to double-check the suggested solutions for the
-exercises, you can look inside the given solutions folder. For your own
-interest, avoid to check the solutions first and ask us any of the doubts you
-may have. Solution exists on the solution branch on Github.
-
-https://github.com/PDC-support/cuda-lab-exercises/tree/solutions
-
 **Let us now compile and run the lab01\_ex1.cu file.** This file
 contains a very simple (yet very important) "Hello World!" CUDA program. We
 will ask you to solve some issues with this exercise later below.
