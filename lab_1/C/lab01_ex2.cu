@@ -25,9 +25,9 @@ float generate_hash(int n, float *y)
 /**
  * Helper method that calculates the elapsed time between two time intervals (in milliseconds).
  */
-long get_elapsed(tval t0, tval t1)
+double get_elapsed(tval t0, tval t1)
 {
-    return (t1.tv_sec - t0.tv_sec) * 1000 + (t1.tv_usec - t0.tv_usec) / 1000;
+    return (double)(t1.tv_sec - t0.tv_sec) * 1000.0L + (double)(t1.tv_usec - t0.tv_usec) / 1000.0L;
 }
 
 /**

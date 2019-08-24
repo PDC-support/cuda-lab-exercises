@@ -120,15 +120,15 @@ void checkCUDAError()
 /**
  * Calculates the elapsed time between two time intervals (in milliseconds).
  */
-long get_elapsed(tval t0, tval t1)
+double get_elapsed(tval t0, tval t1)
 {
-    return (t1.tv_sec - t0.tv_sec) * 1000 + (t1.tv_usec - t0.tv_usec) / 1000;
+    return (double)(t1.tv_sec - t0.tv_sec) * 1000.0L + (double)(t1.tv_usec - t0.tv_usec) / 1000.0L;
 }
 
 /**
  * Stores the result image and prints a message.
  */
-void store_result(int index, long elapsed_cpu, long elapsed_gpu,
+void store_result(int index, double elapsed_cpu, double elapsed_gpu,
                   int width, int height, float *image)
 {
     char path[255];
@@ -137,7 +137,7 @@ void store_result(int index, long elapsed_cpu, long elapsed_gpu,
     writeBMPGrayscale(width, height, image, path);
     
     printf("Step #%d Completed - Result stored in \"%s\".\n", index, path);
-    printf("Elapsed CPU: %ldms / ", elapsed_cpu);
+    printf("Elapsed CPU: %fms / ", elapsed_cpu);
     
     if (elapsed_gpu == 0)
     {
@@ -145,7 +145,7 @@ void store_result(int index, long elapsed_cpu, long elapsed_gpu,
     }
     else
     {
-        printf("Elapsed GPU: %ldms\n", elapsed_gpu);
+        printf("Elapsed GPU: %fms\n", elapsed_gpu);
     }
 }
 
